@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Katalog Lengkap - Grandong Performance</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+   <header>
+    <h1>Grandong</h1> <p>Specialist Performance Parts</p>
+    
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search for parts (Velg, Knalpot, Brand... )">
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="sparepart.html" class="active">Katalog Part</a>
+            <a href="cart.html">Keranjang</a>
+        </div>
+        <div class="cart-icon">
+            🛒 <span id="cart-count">0</span>
+            <a href="cart.html">🛒</a>
+        </div>
+    </nav>
+</header>
+    <main>
+        <div id="partList" class="car-grid"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
