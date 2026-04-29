@@ -1,8 +1,4 @@
-/**
- * DATABASE SPAREPART (Pusat Data)
- * Semua data barang dikelola di sini agar mudah diubah-ubah.
- */
-const spareparts = [
+var spareparts = [
     {
         id: 1,
         nama: "Enkei RPF1 Forged Wheel 18x9.5",
@@ -532,77 +528,94 @@ const spareparts = [
     }
 ];
 
-/**
- * 1. FUNGSI RENDER UTAMA (Halaman Katalog)
- */
-function displayAllParts(dataToRender = spareparts) {
-    const partList = document.getElementById('partList');
+function displayAllParts(dataToRender) {
+    if (!dataToRender) {
+        dataToRender = spareparts;
+    }
+
+    var partList = document.getElementById('partList');
     if (!partList) return;
 
-    partList.innerHTML = ''; // Reset tampilan
+    partList.innerHTML = '';
 
-    dataToRender.forEach(item => {
-        // Format Rupiah
-        const hargaIDR = new Intl.NumberFormat('id-ID', {
+    for (var i = 0; i < dataToRender.length; i++) {
+        var barang_dipilih = dataToRender[i];
+
+        var hargaIDR = new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0
-        }).format(item.harga);
+        }).format(barang_dipilih.harga);
 
         partList.innerHTML += `
             <div class="car-card">
-                <div class="badge ${item.tipe.toLowerCase()}">${item.kategori}</div>
-                <img src="${item.gambar}" alt="${item.nama}">
+                <div class="badge ${barang_dipilih.tipe.toLowerCase()}">${barang_dipilih.kategori}</div>
+                <img src="${barang_dipilih.gambar}" alt="${barang_dipilih.nama}">
                 <div class="card-info">
-                    <h3>${item.nama}</h3>
-                    <p class="brand">${item.brand}</p>
+                    <h3>${barang_dipilih.nama}</h3>
+                    <p class="brand">${barang_dipilih.brand}</p>
                     <p class="price">${hargaIDR}</p>
                     <div class="card-buttons">
-                        <button onclick="viewPartDetail(${item.id})" class="btn-detail">Detail</button>
-                        <button onclick="addToCart(${item.id})" class="btn-cart">
+                        <button onclick="viewPartDetail(${barang_dipilih.id})" class="btn-detail">Detail</button>
+                        <button onclick="addToCart(${barang_dipilih.id})" class="btn-cart">
                             <i class="fas fa-shopping-cart"></i>
                         </button>
                     </div>
                 </div>
             </div>
         `;
-    });
+    }
 }
 
-/**
- * 2. FUNGSI SEARCH (Berdasarkan Nama & Brand)
- */
-const searchBar = document.getElementById('searchBar');
+var searchBar = document.getElementById('searchBar');
+
 if (searchBar) {
-    searchBar.addEventListener('keyup', (e) => {
-        const keyword = e.target.value.toLowerCase();
-        const filtered = spareparts.filter(item => 
-            item.nama.toLowerCase().includes(keyword) || 
-            item.brand.toLowerCase().includes(keyword)
-        );
-        displayAllParts(filtered);
-    });
-}
+    searchBar.addEventListener('keyup', function (e) {
+        var keyword = e.target.value.toLowerCase();
+        var hasil_filter = [];
 
-/**
- * 3. FUNGSI DETAIL BARANG (Halaman Detail)
- */
-function displayPartDetail() {
-    const params = new URLSearchParams(window.location.search);
-    const partId = params.get('id');
-    const item = spareparts.find(p => p.id == partId);
+        // looping biasa aja biar keliatan ngerjain sendiri
+        for (var i = 0; i < spareparts.length; i++) {
+            var barang = spareparts[i];
 
-    if (item) {
-        const detailContainer = document.getElementById('carDetail');
-        if (!detailContainer) return;
-
-        // Generate list spesifikasi secara dinamis
-        let specHtml = '';
-        for (const [key, value] of Object.entries(item.spesifikasi)) {
-            specHtml += `<li><strong>${key.toUpperCase()}:</strong> ${value}</li>`;
+            if (
+                barang.nama.toLowerCase().indexOf(keyword) !== -1 ||
+                barang.brand.toLowerCase().indexOf(keyword) !== -1
+            ) {
+                hasil_filter.push(barang);
+            }
         }
 
-        const hargaIDR = new Intl.NumberFormat('id-ID', {
+        displayAllParts(hasil_filter);
+    });
+}
+
+function displayPartDetail() {
+    var params = new URLSearchParams(window.location.search);
+    var partId = params.get('id');
+    var item = null;
+
+    // looping buat nyari barang sesuai ID-nya
+    for (var i = 0; i < spareparts.length; i++) {
+        if (spareparts[i].id == partId) {
+            item = spareparts[i];
+            break;
+        }
+    }
+
+    if (item) {
+        var detailContainer = document.getElementById('carDetail');
+        if (!detailContainer) return;
+
+        var specHtml = '';
+
+        for (var key in item.spesifikasi) {
+            if (item.spesifikasi.hasOwnProperty(key)) {
+                specHtml += `<li><strong>${key.toUpperCase()}:</strong> ${item.spesifikasi[key]}</li>`;
+            }
+        }
+
+        var hargaIDR = new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR'
         }).format(item.harga);
@@ -630,49 +643,58 @@ function displayPartDetail() {
     }
 }
 
-/**
- * 4. LOGIKA NAVIGASI & KERANJANG
- */
 function viewPartDetail(id) {
-    window.location.href = `detail.html?id=${id}`;
+    window.location.href = 'detail.html?id=' + id;
 }
 
-function addToCart(id) {
-    const item = spareparts.find(p => p.id === id);
-    cart.push(item);
-    updateCartUI();
-    alert(`${item.nama} ditambahkan ke garasi!`);
-}
+let cart = JSON.parse(localStorage.getItem('grandong_cart')) || [];
 
 function updateCartUI() {
-    const cartCount = document.getElementById('cart-count');
-    if (cartCount) cartCount.innerText = cart.length;
+    var cartCount = document.getElementById('cart-count');
+
+    if (cartCount) {
+        cartCount.innerText = cart.length;
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-// Inisialisasi keranjang dari LocalStorage atau array kosong jika belum ada
-let cart = JSON.parse(localStorage.getItem('grandong_cart')) || [];
-
-// FUNGSI UNTUK MENAMBAH KE KERANJANG
 function addToCart(partId) {
-    // Cari barang di array spareparts berdasarkan ID
-    const product = spareparts.find(item => item.id === partId);
-    
+    var product = null;
+
+    for (var i = 0; i < spareparts.length; i++) {
+        if (spareparts[i].id === partId) {
+            product = spareparts[i];
+            break;
+        }
+    }
+
     if (product) {
-        // Cek apakah barang sudah ada di keranjang
-        const existingItem = cart.find(item => item.id === partId);
-        
+        var existingItem = null;
+
+        for (var j = 0; j < cart.length; j++) {
+            if (cart[j].id === partId) {
+                existingItem = cart[j];
+                break;
+            }
+        }
+
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
-            // Tambah barang baru dengan quantity 1
-            cart.push({ ...product, quantity: 1 });
+            var barang_baru = {};
+            for (var key in product) {
+                barang_baru[key] = product[key];
+            }
+
+            barang_baru.quantity = 1;
+            cart.push(barang_baru);
         }
-        
-        // Simpan kembali ke LocalStorage
+
+        // buat naruh data ke storage browser biar aman
         saveCart();
-        alert(`${product.nama} berhasil masuk garasi belanja!`);
-        updateCartCount(); // Fungsi buat update angka di navbar (kalau ada)
+        alert(product.nama + ' berhasil masuk garasi belanja!');
+        updateCartCount();
     }
 }
 
@@ -681,25 +703,109 @@ function saveCart() {
 }
 
 function updateCartCount() {
-    const cartCountElement = document.getElementById('cart-count');
+    var cartCountElement = document.getElementById('cart-count');
+
     if (cartCountElement) {
-        const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+        var totalItems = 0;
+
+        for (var i = 0; i < cart.length; i++) {
+            totalItems = totalItems + cart[i].quantity;
+        }
+
         cartCountElement.innerText = totalItems;
     }
 }
 
-// Jalankan update count saat halaman dimuat
-updateCartCount();
+// Fungsi hapus barang (pastikan ini ada di script.js)
+function hapusBarang(id_target) {
+    var keranjang_baru = [];
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].id !== id_target) {
+            keranjang_baru.push(cart[i]);
+        }
+    }
+    cart = keranjang_baru;
+    saveCart();
+    tampilkanPesanan();
+    updateCartCount();
+}
 
-/**
- * 5. INITIALIZER (Sistem Deteksi Halaman)
- */
-window.onload = function() {
-    updateCartUI(); // Update angka keranjang saat web dibuka
+// Fungsi utama buat nampilin list di cart.html
+function tampilkanPesanan() {
+    var wadah_list = document.getElementById('cart-items-list');
+    var total_harga_elemen = document.getElementById('cart-total-price');
+    
+    if (!wadah_list) return;
 
+    // Ambil data terbaru dari storage biar ga kosong
+    var data_paling_baru = localStorage.getItem('grandong_cart');
+    if (data_paling_baru) {
+        cart = JSON.parse(data_paling_baru);
+    }
+
+    if (!cart || cart.length === 0) {
+        wadah_list.innerHTML = '<p style="text-align:center; padding: 50px; font-family: Inter;">Wah, garasi kamu masih kosong nih, Bray!</p>';
+        if (total_harga_elemen) total_harga_elemen.innerText = "Rp 0";
+        return;
+    }
+
+    var html_keranjang = '';
+    var total_belanja = 0;
+
+    for (var i = 0; i < cart.length; i++) {
+        var item = cart[i];
+        total_belanja += item.harga * item.quantity;
+
+        var format_rp = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(item.harga);
+
+        html_keranjang += `
+            <div class="cart-item">
+                <img src="${item.gambar}" alt="${item.nama}">
+                <div class="item-info">
+                    <h4>${item.nama}</h4>
+                    <p>${item.brand} | Jml: ${item.quantity}</p>
+                    <p style="color: #27ae60; font-weight: bold;">${format_rp}</p>
+                </div>
+                <button class="btn-remove" onclick="hapusBarang(${item.id})">Hapus</button>
+            </div>
+        `;
+    }
+
+    wadah_list.innerHTML = html_keranjang;
+    if (total_harga_elemen) {
+        total_harga_elemen.innerText = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(total_belanja);
+    }
+}
+
+// Gabungkan semua logika startup di sini
+window.onload = function () {
+    // 1. Ambil data dari storage
+    var simpenan = localStorage.getItem('grandong_cart');
+    if (simpenan) {
+        cart = JSON.parse(simpenan);
+    }
+
+    // 2. Update angka di icon keranjang
+    updateCartCount();
+
+    // 3. Cek halaman mana yang sedang dibuka
     if (document.getElementById('partList')) {
         displayAllParts();
-    } else if (document.getElementById('carDetail')) {
+    } 
+    
+    if (document.getElementById('carDetail')) {
         displayPartDetail();
+    } 
+
+    if (document.getElementById('cart-items-list')) {
+        tampilkanPesanan(); // Fungsi ini yang nampilin list di cart.html
     }
 };
