@@ -9,15 +9,29 @@
 </head>
 
 <body>
-    <div class="cart-container">
-        <h1 class="philosophy-title" style="font-size: 3rem;">Your Garage Selection</h1>
-        <div id="cart-items-list">
+    <header>
+        <nav class="navbar">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="sparepart.html">Katalog Part</a>
             </div>
+            <div class="cart-icon" onclick="window.location.href='cart.html'">
+                🛒 <span id="cart-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="cart-container">
+        <h1 class="philosophy-title" style="font-size: 3rem; text-align: center;">Your Garage Selection</h1>
+        
+        <div id="cart-items-list"></div>
+
         <div class="cart-summary">
             <h3>Total: <span id="cart-total-price">Rp 0</span></h3>
-            <button class="btn-explore-minimal" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
+            <button class="btn-explore-minimal" onclick="alert('Checkout Berhasil! Tim Grandong akan menghubungi via WA.')">Checkout via WhatsApp</button>
         </div>
     </div>
-</body>
 
+    <script src="script.js"></script>
+</body>
 </html>
